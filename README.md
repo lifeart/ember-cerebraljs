@@ -38,7 +38,7 @@ export default Ember.Component.extend(CerebralMixin, {
 State is available as props on the component (and routes):
 
 ```js
-// in component foo.js
+// in component x-foo.js
 
 excitedUserName: Ember.computed('userName', function() {
   return `My name is ${this.get('userName')}`;
@@ -53,6 +53,34 @@ actions: {
   }
 }
 ```
+
+
+App state located in:
+```js
+app/states/application.js
+```
+
+App reducers / signals located in:
+```js
+app/signals/application.js
+```
+
+Cerebral config  located in:
+```js
+app/initializers/cerebral.js
+```
+
+
+New namespaces:
+```js
+@cerebral/baobab
+baobab
+cerebral
+emmett
+eventemitter3
+function-tree
+```
+
 
 Thanks
 ----------
