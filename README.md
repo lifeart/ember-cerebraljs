@@ -1,4 +1,4 @@
-# Ember Cerebral / @ember-cerebral
+# Ember Cerebral / ember-cerebraljs
 
 Enhanced state management for complex Ember apps using [Cerebral](https://www.cerebraljs.com/).
 
@@ -13,20 +13,20 @@ In short, Ember Cerebral brings the best of the Flux/React and Ember communities
 
 Installation
 --------------
-- `ember install @ember-cerebral`
+- `ember install ember-cerebraljs`
 
 Usage
 --------
 
 Check out the example [TodoMVC app](https://github.com/bfitch/ember-cerebral-todomvc).
-(TodoMVC app - is old addon version)
+(TodoMVC app - is old addon version [ember-cerebral](https://github.com/bfitch/ember-cerebral))
 
 Expose Cerebral state to your component using the `CerebralMixin` and define a `props[]` array of component mapping properties to their location in the cerebral store:
 
 ```js
 // in component x-foo.js
 
-import CerebralMixin from '@ember-cerebral/mixins/cerebral-mixin';
+import CerebralMixin from 'ember-cerebraljs/mixins/cerebral-mixin';
 
 export default Ember.Component.extend(CerebralMixin, {
   props: [
@@ -41,7 +41,7 @@ State is available as props on the component (and routes):
 // in component foo.js
 
 excitedUserName: Ember.computed('userName', function() {
-  return `${this.get('userName')}!!!!!!`;`
+  return `My name is ${this.get('userName')}`;
 })
 ```
 
