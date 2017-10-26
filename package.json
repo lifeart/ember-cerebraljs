@@ -1,7 +1,7 @@
 {
-  "name": "ember-cerebraljs",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "name": "@ember-cerebral",
+  "version": "3.4.0",
+  "description": "Cerebral addon for Ember.js and Glimmer",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,14 @@
     "start": "ember server",
     "test": "ember try:each"
   },
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lifeart/ember-cerebraljs"
+  },
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Aleksandr Kanunnikov <lifeart92@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.2",
@@ -41,7 +44,12 @@
     "loader.js": "^4.0.1"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "ember-cerebral",
+    "ember-cerebraljs",
+    "cerebraljs",
+    "immutable",
+    "cerebral"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.6"
