@@ -40,7 +40,7 @@ State is available as props on the component (and routes):
 ```js
 // in component x-foo.js
 
-excitedUserName: Ember.computed('userName', function() {
+excitedUserName: computed('userName', function() {
   return `My name is ${this.get('userName')}`;
 })
 ```
@@ -86,7 +86,7 @@ Thanks
 ----------
 Thanks to Toran Billups (@toranb) who's [screencast](https://vimeo.com/160234990) on [ember-redux](https://github.com/toranb/ember-redux) inspired this integration.
 
-Thanks to Brian Fitch (@bfitch) for firs addon version [ember-cerebral](https://github.com/bfitch/ember-cerebral)
+Thanks to Brian Fitch (@bfitch) for first addon version [ember-cerebral](https://github.com/bfitch/ember-cerebral)
 
 -----------------
 For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
