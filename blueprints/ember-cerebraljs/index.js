@@ -2,9 +2,8 @@
 module.exports = {
   description: 'Initializer to configure and inject Cerebral into your application.',
   afterInstall: function () {
-    return this.addAddonsToProject({
+    this.addAddonsToProject({
       packages: [
-        {name: 'broccoli-replace', target: '*'},
         {name: 'ember-cerebral-shim', target: '*'},
         {name: 'ember-cerebral-baobab-shim', target: '*'}
       ]
