@@ -1,8 +1,8 @@
 import { isArray } from '@ember/array';
 import CerebralMixin from '../mixins/cerebral-mixin';
 
-function connect(props=[],actions=[],rawComponent) {
-
+function connect(props=[],actions=[],rawComponent=false) {
+    
     const component = rawComponent.extend(CerebralMixin);
     const actionsObject = component.actions || {};
 

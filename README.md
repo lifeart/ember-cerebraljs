@@ -62,14 +62,16 @@ import {connect} from 'ember-cerebraljs';
 
 
 
-// list of read-only state binded pops
+// list of read-only state binded props
 const props = [
-    'count'
+    'count',
+    'componentPropertyName:stateProperty'
 ];
 
 // list fo signals to bind to actions
 const signals = [
-    'onIncrease'
+    'onIncrease',
+    'actionName:signalName'
 ];
 
 export default connect(props, signals, Component);
