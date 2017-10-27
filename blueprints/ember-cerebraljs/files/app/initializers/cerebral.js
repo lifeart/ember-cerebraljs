@@ -30,6 +30,6 @@ export function initialize(application) {
 }
 
 export default {
-  name: 'cerebral',
+  name: 'cerebraljs',
   initialize
 };
