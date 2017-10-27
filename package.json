@@ -1,6 +1,6 @@
 {
   "name": "ember-cerebraljs",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "Cerebral addon for Ember.js and Glimmer",
   "directories": {
     "doc": "doc",
