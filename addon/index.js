@@ -1,4 +1,4 @@
-import { CerebralMixin } from './mixins';
+import CerebralMixin from './mixins/cerebral-mixin';
 
 export {
     CerebralMixin
