@@ -26,7 +26,7 @@ Expose Cerebral state to your component using the `CerebralMixin` and define a `
 ```js
 // in component x-foo.js
 
-import CerebralMixin from 'ember-cerebraljs/mixins/cerebral-mixin';
+import {CerebralMixin} from 'ember-cerebraljs';
 
 export default Ember.Component.extend(CerebralMixin, {
   props: [
@@ -53,6 +53,34 @@ actions: {
   }
 }
 ```
+
+
+Connect approach for components:
+```js
+import Component from '@ember/component';
+import {connect} from 'ember-cerebraljs';
+
+
+
+// list of read-only state binded pops
+const props = [
+    'count'
+];
+
+// list fo signals to bind to actions
+const signals = [
+    'onIncrease'
+];
+
+export default connect(props, signals, Component);
+
+```
+
+Component template
+```hbs
+{{count}} <button {{action 'onIncrease'}}>onIncrease</button>
+```
+
 
 
 App state located in:
