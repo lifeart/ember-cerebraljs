@@ -4,6 +4,7 @@ module.exports = {
   afterInstall: function () {
     return this.addAddonsToProject({
       packages: [
+        {name: 'broccoli-replace', target: '*'},
         {name: 'ember-cerebral-shim', target: '*'},
         {name: 'ember-cerebral-baobab-shim', target: '*'}
       ]
