@@ -28,7 +28,6 @@ export default Service.extend({
     init() {
         this._super(...arguments);
         const controller = this.createController();
-        console.log('controller',controller);
         this.set('cerebral',controller);
         this.set('signals',controller.module.signals);
     }
