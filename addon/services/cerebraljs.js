@@ -2,24 +2,33 @@ import Service from '@ember/service';
 import { Controller } from 'cerebral'
 import Devtools from 'cerebral/devtools'
 import BaobabModel from '@cerebral/baobab';
-import normalizeSignalName from '../utils/signal-normalizer';
+import {inject} from '@ember/service';
+import rsvp from 'rsvp';
+
+const provide  = function(name, provider) {
+    const f = (context) => {
+        context[name] = provider;
+        return context;
+    }
+    Object.defineProperty(f, 'name', {value: `${name}Provider`, writable: false});
+    return f;
+}
 
 export default Service.extend({
     devToolsEnabled: true, 
     devToolsHost: '127.0.0.1:8585',
     devToolsReconnect: true,
-    setState() {
-        console.error('unable to set state from service, use actions for it');
-    },
-    getState(path) {
-        return this.get('cerebral').getState(path);
-    },
-    sendSignal(name,...props) {
-      const signal = get(this,'cerebral').getSignal(normalizeSignalName(name));
-      signal.apply(signal, props);
-    },
+    store: inject(),
+    ajax: inject(),
     modelConfig() {
         return {immutable: false};
+    },
+    getProviders() {
+        return [
+            provide('store', this.get('store')),
+            provide('ajax', this.get('ajax')),
+            provide('rsvp', rsvp)
+        ];
     },
     getNewModel() {
         return new BaobabModel({}, this.modelConfig());
@@ -32,7 +41,8 @@ export default Service.extend({
                 reconnect: this.get('devToolsReconnect')
             }): undefined,
             state: this.get('state').getState(),
-            signals: this.get('signals').getSignals()
+            signals: this.get('signals').getSignals(),
+            providers: this.getProviders()
         });
         return controller;
     },
