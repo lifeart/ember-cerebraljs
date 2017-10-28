@@ -19,6 +19,9 @@ const SignalsObject = EmberObject.extend({
         } else if (isArray(action)) {
             return action.map((actionName)=>this.getAction(actionName));
         } else {
+            if (!action) {
+                console.error(`Unable to get action ${action}`, actions);
+            }
             return action;
         }
     },
@@ -27,12 +30,17 @@ const SignalsObject = EmberObject.extend({
         const signals = resivedSignals || this.get('signals');
         const realSignals = {};
         const flatternSignals = [];
-        Object.keys(signals).forEach((signalName)=>{
+
+        Object.keys(signals)
+        .forEach((signalName)=>{
             const signal = signals[signalName];
-            realSignals[normalizeSignalName(prefix+''+signalName)] = isArray(signal) ? signal.map((action)=>{
+            const name = normalizeSignalName(`${prefix}${signalName}`);
+            const isObject = typeof signal === 'object';
+            realSignals[name] = isArray(signal) ? signal.map((action)=>{
                return this.getAction(action);
-            }) :  typeof signal === 'object' ? flatternSignals.push([signalName, flatten(signal,{safe:true})]) : this.getAction(signal);
+            }) :  isObject ? flatternSignals.push([signalName, flatten(signal,{safe:true})]) : this.getAction(signal);
         });
+
         flatternSignals.forEach(([prefix, resolvedObject]) => {
             Object.assign(realSignals,this.getSignals(resolvedObject,prefix+'.'));
         });
