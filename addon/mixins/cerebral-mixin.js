@@ -1,15 +1,17 @@
 import Mixin from '@ember/object/mixin';
 import { computed, get, set } from '@ember/object';
-
+import {inject} from '@ember/service';
 export default Mixin.create({
-  props: [],
-  
+  cerebraljs: inject(),
+  props: computed(function (params) {
+    return false;
+  }),
   init() {
+    this.set('cerebral', get(this,'cerebraljs').get('cerebral'));
     this.bindProps(this.cerebralProps());
     this.subscribePropsToCerebralUpdates(this.cerebralProps());
     this._super(...arguments);
   },
-
   cerebralProps() {
     const propsObject = {};
     this.get('props').forEach((propName)=>{
@@ -18,16 +20,14 @@ export default Mixin.create({
     });
     return propsObject;
   },
-
   bindProps(cerebralProps) {
     const cerebral = get(this,'cerebral');
     this._eachInObject(cerebralProps, (prop, path) => {
       set(this, prop, computed(() => {
-        return cerebral.getModel().get(path || prop);
+        return cerebral.getState(path || prop);
       }).readOnly());
     });
   },
-
   _eachInObject(el, fn) {
     Object.keys(el).forEach((key) => {
       fn(key, el[key]);
@@ -44,15 +44,16 @@ export default Mixin.create({
 
   cerebralConnection(method, cerebralProps) {
     this._eachInObject(this.cursorsByProp(cerebralProps), (prop, cursor) => {
-      cursor[method].call(prop, 'update', this.broadcastProptertyChanged(prop));
+      cursor[method]('update', this.broadcastProptertyChanged(prop));
     });
   },
 
   cursorsByProp(cerebralProps) {
-    const cerebral = get(this, 'cerebral');
+    const cerebral = get(this,'cerebral');
     const memo = {};
+    const state = cerebral.getModel().state;
     this._eachInObject(cerebralProps, (prop, path) => {
-      memo[prop] = cerebral.getModel().state.select(path);
+      memo[prop] = state.select.apply(state,path.split('.'));
     });
     return memo;
   },

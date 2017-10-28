@@ -1,14 +1,10 @@
-function increase ({state}) {
-    state.set('count', state.get('count') + 1)
-}
+import { SignalsObject } from 'ember-cerebraljs';
 
-function decrease ({state}) {
-    state.set('count', state.get('count') - 1)
-}
+import actions from '../actions/application';
 
 const signals = {
-    onIncrease: [increase],
-    onDecrease: [decrease]
+    onIncrease: ['increase'],
+    onDecrease: ['decrease']
 }
 
-export default signals;
+export default SignalsObject.create({ actions , signals });

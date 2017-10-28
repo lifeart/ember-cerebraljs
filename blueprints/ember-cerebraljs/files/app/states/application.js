@@ -1,5 +1,12 @@
-const applicationState = {
-    count: 1
-}
+import { StateObject } from 'ember-cerebraljs';
 
-export default applicationState;
+const state = {
+    current: {
+        user: {
+            age: 20,
+            name: 'Developer'
+        }
+    }
+};
+
+export default StateObject.create({state});
