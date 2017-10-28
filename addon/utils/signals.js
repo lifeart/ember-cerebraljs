@@ -1,6 +1,7 @@
 import EmberObject from '@ember/object';
 import { isArray } from '@ember/array';
 import normalizeSignalName from './signal-normalizer';
+import flatten from './flatten';
 
 const SignalsObject = EmberObject.extend({
     getActions(...args) {
@@ -21,15 +22,21 @@ const SignalsObject = EmberObject.extend({
             return action;
         }
     },
-    getSignals() {
-        const signals = this.get('signals');
+    getSignals(resivedSignals,prefix='') {
+
+        const signals = resivedSignals || this.get('signals');
         const realSignals = {};
+        const flatternSignals = [];
         Object.keys(signals).forEach((signalName)=>{
             const signal = signals[signalName];
-            realSignals[normalizeSignalName(signalName)] = isArray(signal) ? signal.map((action)=>{
+            realSignals[normalizeSignalName(prefix+''+signalName)] = isArray(signal) ? signal.map((action)=>{
                return this.getAction(action);
-            }) : this.getAction(signal);
+            }) :  typeof signal === 'object' ? flatternSignals.push([signalName, flatten(signal,{safe:true})]) : this.getAction(signal);
         });
+        flatternSignals.forEach(([prefix, resolvedObject]) => {
+            Object.assign(realSignals,this.getSignals(resolvedObject,prefix+'.'));
+        });
+
         return realSignals;
     }
 });
