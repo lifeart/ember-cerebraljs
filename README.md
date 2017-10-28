@@ -60,8 +60,6 @@ Connect approach for components:
 import Component from '@ember/component';
 import {connect} from 'ember-cerebraljs';
 
-
-
 // list of read-only state binded props
 const props = [
     'count',
@@ -95,14 +93,40 @@ App reducers / signals located in:
 app/signals/application.js
 ```
 
+
+App actions located in:
+```js
+app/actions/application.js
+```
+
+
 Cerebral config  located in:
 ```js
-app/initializers/cerebral.js
+app/services/cerebraljs.js
 ```
 
 
 New namespaces:
 ```js
+
+const {
+    CerebralService,
+    SignalsObject,
+    StateObject,
+    ActionsObject,
+    CerebralMixin,
+    connect
+} from 'ember-cerebraljs';
+
+/*
+CerebralMixin - computed-props based mixin [props]
+connect - component connector connect([props],[signals],component);
+SignalsObject - signals object, SignalsObject.create({signals});
+ActionsObject - actions object, ActionsObject.create({actions});
+StateObject - state object, StateObject.create({state});
+CerebralService - main service & initializer, CerebralService.extend({state,signals});
+*/
+
 @cerebral/baobab
 baobab
 cerebral
@@ -111,6 +135,23 @@ eventemitter3
 function-tree
 ```
 
+
+Example:
+----------
+```js
+
+import Component from '@ember/component';
+import { connect } from 'ember-cerebraljs';
+
+export default connect(
+  ['count:current.user.age'],
+  ['onIncrease'],
+  Component.extend({
+    layout: hbs`{{count}} <button {{action 'onIncrease'}}>onIncrease</button>`
+  })
+)
+
+```
 
 Thanks
 ----------
