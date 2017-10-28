@@ -27,7 +27,7 @@ const SignalsObject = EmberObject.extend({
             const signal = signals[signalName];
             realSignals[signalName] = isArray(signal) ? signal.map((action)=>{
                return this.getAction(action);
-            }) : [];
+            }) : this.getAction(signal);
         });
         return realSignals;
     }
