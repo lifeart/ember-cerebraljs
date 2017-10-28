@@ -1,5 +1,6 @@
 import EmberObject from '@ember/object';
 import { isArray } from '@ember/array';
+import normalizeSignalName from './signal-normalizer';
 
 const SignalsObject = EmberObject.extend({
     getActions(...args) {
@@ -25,7 +26,7 @@ const SignalsObject = EmberObject.extend({
         const realSignals = {};
         Object.keys(signals).forEach((signalName)=>{
             const signal = signals[signalName];
-            realSignals[signalName] = isArray(signal) ? signal.map((action)=>{
+            realSignals[normalizeSignalName(signalName)] = isArray(signal) ? signal.map((action)=>{
                return this.getAction(action);
             }) : this.getAction(signal);
         });

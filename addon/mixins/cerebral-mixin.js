@@ -1,6 +1,7 @@
 import Mixin from '@ember/object/mixin';
 import { computed, get, set } from '@ember/object';
 import {inject} from '@ember/service';
+import normalizeSignalName from '../utils/signal-normalizer';
 export default Mixin.create({
   cerebraljs: inject(),
   props: computed(function (params) {
@@ -65,7 +66,7 @@ export default Mixin.create({
   },
 
   sendSignal(name,...props) {
-      const signal = get(this,'cerebral').getSignal(name);
+      const signal = get(this,'cerebral').getSignal(normalizeSignalName(name));
       signal.apply(signal, props);
   },
 

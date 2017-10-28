@@ -1,5 +1,6 @@
 import CerebralMixin from './mixins/cerebral-mixin';
 import CerebralService from './services/cerebraljs';
+import normalizeSignalName from './utils/signal-normalizer';
 import connect from './utils/connect';
 import SignalsObject from './utils/signals';
 import StateObject from './utils/states';
@@ -11,5 +12,6 @@ export {
     StateObject,
     ActionsObject,
     CerebralMixin,
-    connect
+    connect,
+    normalizeSignalName
 };
