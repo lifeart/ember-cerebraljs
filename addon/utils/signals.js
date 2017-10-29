@@ -18,10 +18,18 @@ const SignalsObject = EmberObject.extend({
             return actions.get(action).bind(actions);
         } else if (isArray(action)) {
             return action.map((actionName)=>this.getAction(actionName));
+        } else if (typeof action === 'object') {
+            const paths = Object.keys(action);
+            paths.forEach((pathName)=>{
+                const acts = action[pathName];
+                if (isArray(acts)) {
+                    action[pathName] = acts.map((actionName)=>this.getAction(actionName));
+                } else {
+                    action[pathName] = this.getAction(acts);
+                }
+            });
+            return action;
         } else {
-            if (!action) {
-                console.error(`Unable to get action ${action}`, actions);
-            }
             return action;
         }
     },
