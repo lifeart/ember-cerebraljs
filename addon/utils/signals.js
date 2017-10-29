@@ -1,11 +1,12 @@
 import EmberObject from '@ember/object';
+import { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import normalizeSignalName from './signal-normalizer';
 import flatten from './flatten';
 
 const SignalsObject = EmberObject.extend({
     getActions(...args) {
-        const props = this.get('actions').getProperties(args);
+        const props = get(this, 'actions').getProperties(args);
         const actionsList = [];
         args.forEach((actionName) => {
             actionsList.push(props[actionName]);
@@ -13,9 +14,14 @@ const SignalsObject = EmberObject.extend({
         return actionsList;
     },
     getAction(action) {
-        const actions = this.get('actions');
+        const actions = get(this, 'actions');
         if (typeof action === 'string') {
-            return actions.get(action).bind(actions);
+            const resolvedAction = get(actions, action);
+            if (!resolvedAction) {
+                console.error(`Unable to get action "${action}" from actions object`, actions);
+                return action;
+            }
+            return resolvedAction.bind(actions);
         } else if (isArray(action)) {
             return action.map((actionName)=>this.getAction(actionName));
         } else if (typeof action === 'object') {
@@ -35,7 +41,7 @@ const SignalsObject = EmberObject.extend({
     },
     getSignals(resivedSignals,prefix='') {
 
-        const signals = resivedSignals || this.get('signals');
+        const signals = resivedSignals || get(this,'signals');
         const realSignals = {};
         const flatternSignals = [];
 
