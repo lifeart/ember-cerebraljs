@@ -13,25 +13,51 @@ const SignalsObject = EmberObject.extend({
         });
         return actionsList;
     },
-    getAction(action) {
+    getActionFromNamespace(action, namespace = '') {
+        if (action.indexOf('.')>-1) {
+            let actionArr = action.split('.');
+            action = actionArr.pop();
+            namespace = `${namespace}/${actionArr.join('/')}`;
+        }
+        const actions = get(this, 'actions');
+        let namespaces = namespace.split('/');
+        for (let i = 0; i < namespaces.length; i++) {
+            let path = namespaces.slice(0,i?-i:undefined).join('.');
+            
+            let result  = get(actions,path);
+            if (result) {
+
+                if (typeof result === 'function') {
+                    return result;
+                }
+
+                if (action in result) {
+                    return result[action];
+                }
+                
+            }
+        }
+        return false;
+    },
+    getAction(action, namespace) {
         const actions = get(this, 'actions');
         if (typeof action === 'string') {
-            const resolvedAction = get(actions, action);
+            const resolvedAction = this.getActionFromNamespace(action,namespace) || get(actions, action);
             if (!resolvedAction) {
                 console.error(`Unable to get action "${action}" from actions object`, actions);
                 return action;
             }
             return resolvedAction.bind(actions);
         } else if (isArray(action)) {
-            return action.map((actionName)=>this.getAction(actionName));
+            return action.map((actionName)=>this.getAction(actionName, namespace));
         } else if (typeof action === 'object') {
             const paths = Object.keys(action);
             paths.forEach((pathName)=>{
                 const acts = action[pathName];
                 if (isArray(acts)) {
-                    action[pathName] = acts.map((actionName)=>this.getAction(actionName));
+                    action[pathName] = acts.map((actionName)=>this.getAction(actionName, namespace));
                 } else {
-                    action[pathName] = this.getAction(acts);
+                    action[pathName] = this.getAction(acts, namespace);
                 }
             });
             return action;
@@ -51,8 +77,8 @@ const SignalsObject = EmberObject.extend({
             const name = normalizeSignalName(`${prefix}${signalName}`);
             const isObject = typeof signal === 'object';
             realSignals[name] = isArray(signal) ? signal.map((action)=>{
-               return this.getAction(action);
-            }) :  isObject ? flatternSignals.push([signalName, flatten(signal,{safe:true})]) : this.getAction(signal);
+               return this.getAction(action, name);
+            }) :  isObject ? flatternSignals.push([signalName, flatten(signal,{safe:true})]) : this.getAction(signal, name);
         });
 
         flatternSignals.forEach(([prefix, resolvedObject]) => {
