@@ -20,7 +20,7 @@ const SignalsObject = EmberObject.extend({
             namespace = `${namespace}/${actionArr.join('/')}`;
         }
         const actions = get(this, 'actions');
-        let namespaces = namespace.split('/');
+        let namespaces = namespace.split('/').filter(el=>el);
         for (let i = 0; i < namespaces.length; i++) {
             let path = namespaces.slice(0,i?-i:undefined).join('.');
             
@@ -67,7 +67,7 @@ const SignalsObject = EmberObject.extend({
     },
     getSignals(resivedSignals,prefix='') {
 
-        const signals = resivedSignals || get(this,'signals');
+        const signals = resivedSignals || get(this,'signals') || {};
         const realSignals = {};
         const flatternSignals = [];
 
