@@ -105,6 +105,32 @@ Cerebral config  located in:
 app/services/cerebraljs.js
 ```
 
+Actions resolving rules (for string action)
+```js
+//example:
+
+{
+  signals: {
+    user: {
+      management: {
+        save: ['showProgressBar','save', 'hideProgressBar']
+      }
+    }
+  }
+}
+
+// `showProgressBar`, `save`, `hideProgressBar` will be resolved by this logic:
+
+actions.user.management.save[actionName]
+  else
+actions.user.management[actionName]
+  else
+actions.user[actionName]
+  else
+actions[actionName]
+
+```
+
 
 New namespaces:
 ```js
