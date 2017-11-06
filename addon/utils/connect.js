@@ -56,7 +56,7 @@ function connect(props=[],actions=[],rawComponent=false) {
                 props: propKeys,
                 dependencies,
                 controller: this.get('cerebraljs').get('cerebral'),
-                displayName: this.get('elementId'),
+                displayName: this.toString() || String(this.get('elementId')),
             });
 
             this._cerebralView.mount();
