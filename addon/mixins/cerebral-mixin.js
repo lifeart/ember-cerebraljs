@@ -14,9 +14,10 @@ export default Mixin.create({
     return false;
   }),
   init() {
-    set(this,'cerebral', get(this, 'cerebraljs').get('cerebral'));
-    this.bindProps(this.cerebralProps());
-    this.subscribePropsToCerebralUpdates(this.cerebralProps());
+    this._propertyPathConnections = {};
+    set(this, 'cerebral', get(this, 'cerebraljs').get('cerebral'));
+    this._bindProps(this.cerebralProps());
+    this._subscribePropsToCerebralUpdates(this.cerebralProps());
     this._super(...arguments);
   },
   cerebralProps() {
@@ -27,17 +28,55 @@ export default Mixin.create({
     });
     return propsObject;
   },
-  bindProps(cerebralProps) {
+  createCerebralHandlerFor(propertyName) {
+    return function (target, key) {
+      this.disconnectPathFromProperty(false, propertyName);
+      this.connectPathToProperty(this.get(key), propertyName);
+      this.notifyPropertyChange(propertyName);
+    }.bind(this);
+  },
+  _bindProps(cerebralProps) {
     const cerebral = get(this, 'cerebral');
+
     this._eachInObject(cerebralProps, (prop, path) => {
+
+      let pathName = path || prop;
+      let hasBindedProperty = false;
+      let bindedProperty = false;
+
+      if (pathName.startsWith('@')) {
+        bindedProperty = pathName.replace('@', '');
+        pathName = this.get(bindedProperty);
+        hasBindedProperty = true;
+      }
+
       set(this, prop, computed(() => {
-        const pathName = path || prop;
-        const result = cerebral.getState(pathName);
+        let result;
+        if (hasBindedProperty) {
+          let statePath = this.get(bindedProperty);
+          result = statePath ? cerebral.getState(statePath) : `@${bindedProperty}`;
+        } else {
+          result = cerebral.getState(pathName);
+        }
         if (typeof result === 'undefined') {
-          console.error(`Unable to get state for property "${prop}" by path "${pathName}"`, this, cerebral);
+          if (hasBindedProperty) {
+            console.error(`Unable to get state for property "${prop}" by binded as property "${bindedProperty}" path "${this.get(bindedProperty)}"`, this, cerebral);
+          } else {
+            console.error(`Unable to get state for property "${prop}" by path "${pathName}"`, this, cerebral);
+          }
         }
         return result;
       }).readOnly());
+
+      if (hasBindedProperty) {
+        let handlerName = `${bindedProperty}@BindingDidChange`;
+        this[handlerName] = this.createCerebralHandlerFor(prop);
+        this.addObserver(bindedProperty, this, handlerName);
+        if (this.get(bindedProperty)) {
+          this.connectPathToProperty(this.get(bindedProperty), prop);
+        }
+      }
+
     });
   },
   _eachInObject(el, fn) {
@@ -46,31 +85,58 @@ export default Mixin.create({
     });
   },
 
-  subscribePropsToCerebralUpdates(cerebralProps) {
-    this.cerebralConnection('on', cerebralProps);
+  _subscribePropsToCerebralUpdates(cerebralProps) {
+    this._cerebralConnection('on', cerebralProps);
   },
 
-  unsubscribePropsToCerebralUpdates(cerebralProps) {
-    this.cerebralConnection('off', cerebralProps);
+  _unsubscribePropsToCerebralUpdates(cerebralProps) {
+    this._cerebralConnection('off', cerebralProps);
   },
 
-  cerebralConnection(method, cerebralProps) {
+  _propertyBroadcaster(cursor, method, prop) {
+    cursor[method]('update', this._broadcastProptertyChanged(prop));
+  },
+
+  _cerebralConnection(method, cerebralProps) {
     this._eachInObject(this.cursorsByProp(cerebralProps), (prop, cursor) => {
-      cursor[method]('update', this.broadcastProptertyChanged(prop));
+      this._propertyBroadcaster(cursor, method, prop);
     });
   },
 
-  cursorsByProp(cerebralProps) {
+  cursorByPath(path) {
     const cerebral = get(this, 'cerebral');
-    const memo = {};
     const state = cerebral.getModel().state;
+    return state.select.apply(state, path.split('.'));
+  },
+
+  connectPathToProperty(path, prop) {
+    this._propertyPathConnections[prop] = path;
+    let cursor = this.cursorByPath(path);
+    this._propertyBroadcaster(cursor, 'on', prop);
+  },
+
+  disconnectPathFromProperty(path, prop) {
+    if (!path) {
+      path = this._propertyPathConnections[prop] || false;
+    }
+    if (!path) {
+      return;
+    }
+    let cursor = this.cursorByPath(path);
+    this._propertyBroadcaster(cursor, 'off', prop);
+  },
+
+  cursorsByProp(cerebralProps) {
+    const memo = {};
     this._eachInObject(cerebralProps, (prop, path) => {
-      memo[prop] = state.select.apply(state, path.split('.'));
+      if (!path.startsWith('@')) {
+        memo[prop] = this.cursorByPath(path);
+      }
     });
     return memo;
   },
 
-  broadcastProptertyChanged(prop) {
+  _broadcastProptertyChanged(prop) {
     return () => {
       this.notifyPropertyChange(prop);
     };
@@ -87,6 +153,6 @@ export default Mixin.create({
 
   didDestroyElement() {
     this._super(...arguments);
-    this.unsubscribePropsToCerebralUpdates(this.cerebralProps());
+    this._unsubscribePropsToCerebralUpdates(this.cerebralProps());
   }
 });
