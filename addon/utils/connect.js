@@ -7,6 +7,7 @@ function connect(props=[],actions=[],rawComponent=false) {
     
     const component = rawComponent.extend(CerebralMixin);
     const actionsObject = component.actions || {};
+    const bindedFlag = '@';
 
     if (!isArray(props)) {
         const propsArray = Object.keys(props).map(key=>{
@@ -18,10 +19,20 @@ function connect(props=[],actions=[],rawComponent=false) {
     if (isArray(actions)) {
         actions.forEach((action)=>{
             if (typeof action === 'string') {
-                const [localName, signalName = localName] = action.split(':');
+                let [localName, signalName = localName] = action.split(':');
+                localName = localName.replace(bindedFlag,'');
                 actionsObject[localName] = (function(signal) {
                     return function(params) {
-                        this.sendSignal.apply(this,[signal].concat(params));
+                        if (signal.startsWith(bindedFlag)) {
+                            let resolvedSignal = this.get(signal.replace(bindedFlag,''));
+                            if (!resolvedSignal) {
+                                console.error(`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
+                                return;
+                            }
+                            this.sendSignal.apply(this,[resolvedSignal].concat(params));
+                        } else {
+                            this.sendSignal.apply(this,[signal].concat(params));
+                        }
                     };
                 })(signalName);
             } else {
