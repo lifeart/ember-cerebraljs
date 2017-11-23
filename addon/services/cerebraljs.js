@@ -25,6 +25,14 @@ export default Service.extend({
     },
     getProviders() {
         return [
+            (function() {
+                const f = (context) => {
+                    context['args'] = context.props ? context.props.args : [];
+                    return context;
+                }
+                Object.defineProperty(f, 'name', {value: `argsProvider`, writable: false});
+                return f;
+            })(),
             provide('store', this.get('store')),
             provide('ajax', this.get('ajax')),
             provide('rsvp', rsvp)

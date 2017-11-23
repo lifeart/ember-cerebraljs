@@ -16,25 +16,33 @@ function connect(props=[],actions=[],rawComponent=false) {
         props = propsArray;
     }
 
+    let castToPrimitive = function(payload) {
+        let p = JSON.parse(JSON.stringify(payload));
+        if (isArray(p)) {
+            return {
+                args: p
+            }
+        }
+        return payload;
+    };
+
     if (isArray(actions)) {
         actions.forEach((action)=>{
             if (typeof action === 'string') {
-                let [localName, signalName = localName] = action.split(':');
+                let [localName, signal = localName] = action.split(':');
                 localName = localName.replace(bindedFlag,'');
-                actionsObject[localName] = (function(signal) {
-                    return function(params) {
-                        if (signal.startsWith(bindedFlag)) {
-                            let resolvedSignal = this.get(signal.replace(bindedFlag,''));
-                            if (!resolvedSignal) {
-                                console.error(`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
-                                return;
-                            }
-                            this.sendSignal.apply(this,[resolvedSignal].concat(params));
-                        } else {
-                            this.sendSignal.apply(this,[signal].concat(params));
+                actionsObject[localName] = function(...params) {
+                    if (signal.startsWith(bindedFlag)) {
+                        let resolvedSignal = this.get(signal.replace(bindedFlag,''));
+                        if (!resolvedSignal) {
+                            console.error(`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
+                            return;
                         }
-                    };
-                })(signalName);
+                        this.sendSignal.apply(this,[resolvedSignal].concat(castToPrimitive(params)));
+                    } else {
+                        this.sendSignal.apply(this,[signal].concat(castToPrimitive(params)));
+                    }
+                };
             } else {
                 Object.assign(actionsObject,action);
             }
