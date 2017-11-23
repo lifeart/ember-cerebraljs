@@ -1,7 +1,7 @@
 import { isArray } from '@ember/array';
 import CerebralMixin from '../mixins/cerebral-mixin';
-import { View } from 'cerebral'
-import { state } from 'cerebral/tags'
+import { View } from 'cerebral';
+import { state } from 'cerebral/tags';
 
 function connect(props=[],actions=[],rawComponent=false) {
     
@@ -51,18 +51,33 @@ function connect(props=[],actions=[],rawComponent=false) {
             this._super(...arguments);
             this._cerebralView.unMount();
         },
-        didInsertElement() {
-            this._super(...arguments);
-
+        _getCerebralViewProps() {
             const dependencies = {};
             const propKeys = {};
 
             props.forEach((property)=>{
                 const [localKey,stateKey=localKey] = property.split(':');
-                dependencies[localKey] = state`${stateKey}`;
-                propKeys[localKey] = stateKey;
+                if (stateKey.startsWith('@')) {
+                    let currentKey = this.get(stateKey.replace('@','')) || stateKey;
+                    dependencies[localKey] = state`${currentKey}`;
+                    propKeys[localKey] = currentKey;
+                } else {
+                    dependencies[localKey] = state`${stateKey}`;
+                    propKeys[localKey] = stateKey;
+                }
+                
             });
-            
+
+            return {
+                dependencies,
+                propKeys
+            };
+        },
+        didInsertElement() {
+            this._super(...arguments);
+
+            let {dependencies, propKeys} = this._getCerebralViewProps();
+
             this._cerebralView = new View({
                 props: propKeys,
                 dependencies,
@@ -70,6 +85,7 @@ function connect(props=[],actions=[],rawComponent=false) {
                 displayName: this.toString() || String(this.get('elementId'))
             });
 
+            
             this._cerebralView.mount();
         }
     }); 
