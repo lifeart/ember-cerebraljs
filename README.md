@@ -179,6 +179,28 @@ export default connect(
 
 ```
 
+Hold ON!
+----------
+What about dynamic paths and signals bindings?
+
+- it's easy.
+
+```js
+
+import Component from '@ember/component';
+import { connect } from 'ember-cerebraljs';
+
+export default connect(
+  ['count:@componentAttributePath'],
+  ['onIncrease:@componentAttributeSignal'],
+  Component.extend({
+    layout: hbs`{{count}} <button {{action 'onIncrease'}}>onIncrease</button>`
+  })
+)
+
+```
+
+----------
 Thanks
 ----------
 Thanks to Toran Billups (@toranb) who's [screencast](https://vimeo.com/160234990) on [ember-redux](https://github.com/toranb/ember-redux) inspired this integration.
