@@ -30,7 +30,8 @@ import {CerebralMixin} from 'ember-cerebraljs';
 
 export default Ember.Component.extend(CerebralMixin, {
   props: [
-      'userName:path.to.cerebral.userName'
+      'userName:path.to.cerebral.userName',
+      'petName:@someDynamicAtrributeNameWithPath'
   ]
 });
 ```
@@ -43,6 +44,10 @@ State is available as props on the component (and routes):
 excitedUserName: computed('userName', function() {
   return `My name is ${this.get('userName')}`;
 })
+
+
+this.set('someDynamicAtrributeNameWithPath','path.to.cerebral.petName');
+this.get('petName') // -> resolved to 'path.to.cerebral.petName'
 ```
 
 Trigger signals to change state:
