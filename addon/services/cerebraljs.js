@@ -2,7 +2,7 @@ import Service from '@ember/service';
 import { Controller } from 'cerebral'
 import Devtools from 'cerebral/devtools'
 import BaobabModel from '@cerebral/baobab';
-import {inject} from '@ember/service';
+import { inject } from '@ember/service';
 import rsvp from 'rsvp';
 
 const provide  = function(name, provider) {
