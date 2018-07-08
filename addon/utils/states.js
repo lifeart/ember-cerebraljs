@@ -1,9 +1,9 @@
-import EmberObject from '@ember/object';
+import EmberObject, { getWithDefault } from '@ember/object';
 
-const StateObject = EmberObject.extend({
+class StateObject extends EmberObject {
     getState() {
-        return this.get('state') || {};
+        return getWithDefault(this, 'state', {});
     }
-});
+}
 
 export default StateObject;

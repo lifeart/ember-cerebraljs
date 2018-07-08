@@ -3,100 +3,144 @@ import CerebralMixin from '../mixins/cerebral-mixin';
 import { View } from 'cerebral';
 import { state } from 'cerebral/tags';
 
-function connect(props=[],actions=[],rawComponent=false) {
-    
-    const component = rawComponent.extend(CerebralMixin);
-    const actionsObject = component.actions || {};
-    const bindedFlag = '@';
+const BINDED_FLAG = '@';
 
-    if (!isArray(props)) {
-        const propsArray = Object.keys(props).map(key=>{
-            return `${key}:${props[key]}`;
-        });
-        props = propsArray;
-    }
+export function objectToArray(props) {
+    return Object.keys(props).map(key=>{
+        return `${key}:${props[key]}`;
+    });
+}
 
-    let castToPrimitive = function(payload) {
-        let p = JSON.parse(JSON.stringify(payload));
-        if (isArray(p)) {
-            return {
-                args: p
-            }
+export function castToPrimitive(payload) {
+    let p = JSON.parse(JSON.stringify(payload));
+    if (isArray(p)) {
+        return {
+            args: p
         }
-        return payload;
-    };
+    }
+    return payload;
+}
 
+export function createActionHandler (signal) {
+    return function(...params) {
+        if (signal.startsWith(BINDED_FLAG)) {
+            let resolvedSignal = this.get(signal.replace(BINDED_FLAG,''));
+            if (!resolvedSignal) {
+                console.error(`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
+                return;
+            }
+            this.sendSignal.apply(this, [resolvedSignal].concat(castToPrimitive(params)));
+        } else {
+            this.sendSignal.apply(this, [signal].concat(castToPrimitive(params)));
+        }
+    };
+}
+
+export function addActionToObject(action, obj) {
+    if (typeof action === 'string') {
+        let [localName, signal = localName] = action.split(':');
+        localName = localName.replace(BINDED_FLAG,'');
+        obj[localName] = createActionHandler(signal)
+    } else {
+        Object.assign(obj, action);
+    }
+}
+
+export function mapPropsToDepsAndKeys(props) {
+    const dependencies = {};
+    const propKeys = {};
+
+    props.forEach((property)=>{
+        const [localKey, stateKey=localKey] = property.split(':');
+        if (stateKey.startsWith(BINDED_FLAG)) {
+            let currentKey = this.get(stateKey.replace(BINDED_FLAG,'')) || stateKey;
+            dependencies[localKey] = state`${currentKey}`;
+            propKeys[localKey] = currentKey;
+        } else {
+            dependencies[localKey] = state`${stateKey}`;
+            propKeys[localKey] = stateKey;
+        }
+    });
+
+    return {
+        dependencies,
+        propKeys
+    };
+}
+
+export function createCerebralView(context) {
+    let { dependencies, propKeys } = mapPropsToDepsAndKeys(context.get('props'));
+    let view =  new View({
+        props: propKeys,
+        dependencies,
+        controller: context.get('cerebraljs').get('cerebral'),
+        displayName: context.toString() || String(context.get('elementId'))
+    });
+    this._cerebralView = view;
+    this._cerebralView.mount();
+}
+
+export function destroyCerebralView(context) {
+    context._cerebralView.unMount();
+}
+
+export function normalizeProps(props) {
+    if (!isArray(props)) {
+        return objectToArray(props)
+    } else {
+        return props.slice();
+    }
+}
+
+export function normalizeActions(actions) {
+    let result = {};
     if (isArray(actions)) {
         actions.forEach((action)=>{
-            if (typeof action === 'string') {
-                let [localName, signal = localName] = action.split(':');
-                localName = localName.replace(bindedFlag,'');
-                actionsObject[localName] = function(...params) {
-                    if (signal.startsWith(bindedFlag)) {
-                        let resolvedSignal = this.get(signal.replace(bindedFlag,''));
-                        if (!resolvedSignal) {
-                            console.error(`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
-                            return;
-                        }
-                        this.sendSignal.apply(this,[resolvedSignal].concat(castToPrimitive(params)));
-                    } else {
-                        this.sendSignal.apply(this,[signal].concat(castToPrimitive(params)));
-                    }
-                };
-            } else {
-                Object.assign(actionsObject,action);
-            }
+            addActionToObject(action, result);
         });
     } else {
-        Object.assign(actionsObject, action);
+        Object.assign(result, actions);
     }
+    return result;
+}
+
+export function connectEmberComponent(props=[], actions=[], rawComponent=false) {
+    const component = rawComponent.extend(CerebralMixin);
+    const actionsObject = component.actions || {};
+   
+    const normalizedProps = normalizeProps(props);
+    const normalizedActions = normalizeActions(actions);
+
+    Object.assign(actionsObject, normalizedActions);
 
     return component.extend({
-
-        props: props,
+        props: normalizedProps,
         actions: actionsObject,
         willDestroyElement() {
+            destroyCerebralView(this);
             this._super(...arguments);
-            this._cerebralView.unMount();
-        },
-        _getCerebralViewProps() {
-            const dependencies = {};
-            const propKeys = {};
-
-            props.forEach((property)=>{
-                const [localKey,stateKey=localKey] = property.split(':');
-                if (stateKey.startsWith('@')) {
-                    let currentKey = this.get(stateKey.replace('@','')) || stateKey;
-                    dependencies[localKey] = state`${currentKey}`;
-                    propKeys[localKey] = currentKey;
-                } else {
-                    dependencies[localKey] = state`${stateKey}`;
-                    propKeys[localKey] = stateKey;
-                }
-                
-            });
-
-            return {
-                dependencies,
-                propKeys
-            };
         },
         didInsertElement() {
+            createCerebralView(this);
             this._super(...arguments);
-
-            let {dependencies, propKeys} = this._getCerebralViewProps();
-
-            this._cerebralView = new View({
-                props: propKeys,
-                dependencies,
-                controller: this.get('cerebraljs').get('cerebral'),
-                displayName: this.toString() || String(this.get('elementId'))
-            });
-
-            
-            this._cerebralView.mount();
         }
     }); 
+}
+
+export function connectGlimmerComponent(props, actions, rawComponent) {
+    class CerebralConnectedComponent extends rawComponent {
+        ///
+    }
+
+    return CerebralConnectedComponent;
+}
+
+export function connect(props=[], actions=[], rawComponent=false) {
+    if (!('extend' in rawComponent)) {
+        return connectGlimmerComponent(props, actions, rawComponent);
+    } else {
+        return connectEmberComponent(props, actions, rawComponent);
+    }
 }
 
 export default connect;
