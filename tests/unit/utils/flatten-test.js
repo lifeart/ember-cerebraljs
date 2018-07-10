@@ -35,12 +35,13 @@ module('Unit | Utility | flatten', function() {
       delimiter: '.',
       maxDepth: 10
     });
+
     assert.equal(result['a'], 'b');
     assert.equal(result['b.c'], 'd');
     assert.equal(result['b.e'], 1);
-    assert.equal(result['b.e.f.0'], 1);
-    assert.equal(result['b.e.f.0'], 2);
-    assert.equal(result['b.e.h.i.g.k.l.m.n.o'], 2);
+    assert.equal(result['b.f.0'], 1);
+    assert.equal(result['b.f.1'], 2);
+    assert.equal(result['b.h.i.g.k.l.m.n.o'], 42);
   });
 
 });

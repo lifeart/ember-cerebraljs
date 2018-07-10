@@ -105,7 +105,7 @@ export function normalizeActions(actions) {
     return result;
 }
 
-export function connectEmberComponent(props=[], actions=[], rawComponent=false) {
+export function connectEmberComponent(props=[], actions=[], rawComponent={}) {
     const component = rawComponent.extend(CerebralMixin);
     const actionsObject = component.actions || {};
    
@@ -128,15 +128,11 @@ export function connectEmberComponent(props=[], actions=[], rawComponent=false) 
     }); 
 }
 
-export function connectGlimmerComponent(props, actions, rawComponent) {
-    class CerebralConnectedComponent extends rawComponent {
-        ///
-    }
+export function connectGlimmerComponent() {
 
-    return CerebralConnectedComponent;
 }
 
-export function connect(props=[], actions=[], rawComponent=false) {
+export function connect(props=[], actions=[], rawComponent={}) {
     if (!('extend' in rawComponent)) {
         return connectGlimmerComponent(props, actions, rawComponent);
     } else {

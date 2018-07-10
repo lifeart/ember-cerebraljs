@@ -7,13 +7,14 @@ import {
 import {
   inject
 } from '@ember/service';
+import { A } from '@ember/array';
 import normalizeSignalName from '../utils/signal-normalizer';
 import logger from '../utils/logger';
 
 export default Mixin.create({
   cerebraljs: inject(),
   props: computed(function () {
-    return false;
+    return A();
   }),
   init() {
     this._propertyPathConnections = {};

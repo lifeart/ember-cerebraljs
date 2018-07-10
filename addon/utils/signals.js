@@ -1,17 +1,18 @@
-import EmberObject from '@ember/object';
-import { get } from '@ember/object';
+import EmberObject, { getWithDefault } from '@ember/object';
+import { get, getProperties } from '@ember/object';
 import { isArray } from '@ember/array';
 import normalizeSignalName from './signal-normalizer';
 import flatten from './flatten';
 import logger from './logger';
-class SignalsObject extends EmberObject {
+
+const SignalsObject = {
     getActions(...args) {
-        const props = get(this, 'actions').getProperties(args);
+        const props = getProperties(get(this, 'actions'), args);
         return args.reduce((actionsList, actionName)=>{
             actionsList.push(props[actionName]);
             return actionsList;
         }, []);
-    }
+    },
     getActionFromNamespace(action, namespace = '') {
         const actions = get(this, 'actions');
         if (action.includes('.')) {
@@ -36,8 +37,8 @@ class SignalsObject extends EmberObject {
             }
 
         }
-        return false;
-    }
+        return getWithDefault(actions, action, false);
+    },
     _getActionFromString(action, namespace) {
         const actions = get(this, 'actions');
         const resolvedAction = this.getActionFromNamespace(action,namespace) || get(actions, action);
@@ -46,10 +47,10 @@ class SignalsObject extends EmberObject {
             return action;
         }
         return resolvedAction.bind(actions);
-    }
+    },
     _getActionFromArray(action, namespace) {
         return action.map((actionName) => this.getAction(actionName, namespace));
-    }
+    },
     _getActionFromObject(action, namespace) {
         const paths = Object.keys(action);
         paths.forEach((pathName) => {
@@ -61,7 +62,7 @@ class SignalsObject extends EmberObject {
             }
         });
         return action;
-    }
+    },
     getAction(action, namespace) {
         if (typeof action === 'string') {
             return this._getActionFromString(action, namespace);
@@ -72,7 +73,7 @@ class SignalsObject extends EmberObject {
         } else {
             return action;
         }
-    }
+    },
     getSignals(resivedSignals, prefix='') {
 
         const signals = resivedSignals || get(this,'signals') || {};
@@ -84,9 +85,15 @@ class SignalsObject extends EmberObject {
             const signal = signals[signalName];
             const name = normalizeSignalName(`${prefix}${signalName}`);
             const isObject = typeof signal === 'object';
-            realSignals[name] = isArray(signal) ? signal.map((action)=>{
-               return this.getAction(action, name);
-            }) :  isObject ? flatternSignals.push([signalName, flatten(signal,{safe:true})]) : this.getAction(signal, name);
+            if (isArray(signal)) {
+                realSignals[name] = signal.map((action)=>{
+                    return this.getAction(action, name);
+                });
+            } else if (isObject) {
+                flatternSignals.push([signalName, flatten(signal,{safe:true})])
+            } else {
+                realSignals[name] = this.getAction(signal, name);
+            }
         });
 
         flatternSignals.forEach(([prefix, resolvedObject]) => {
@@ -97,4 +104,4 @@ class SignalsObject extends EmberObject {
     }
 }
 
-export default SignalsObject;
+export default EmberObject.extend(SignalsObject);

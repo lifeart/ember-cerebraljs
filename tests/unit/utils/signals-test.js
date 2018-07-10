@@ -30,9 +30,9 @@ module('Unit | Utility | signals', function() {
     function getFn(name, index) {
       return {
         [name]() {
-          return `${name}${index}`;
+          return index;
         }
-      }
+      }[name];
     }
 
     let actions = {
@@ -66,14 +66,13 @@ module('Unit | Utility | signals', function() {
       actions
     }).create();
 
-    assert.equal(result.getActionFromNamespace('foo')(), 1);
-    assert.equal(result.getActionFromNamespace('foo', 'space')(), 2);
-    assert.equal(result.getActionFromNamespace('foo', 'space.no-space')(), 0);
-    assert.equal(result.getActionFromNamespace('foo', 'space.nested')(), 3);
-    assert.equal(result.getActionFromNamespace('foo', 'space.nested.so-nested')(), 4);
-    assert.equal(result.getActionFromNamespace('foo', 'space.nested.so/nested')(), 5);
-    assert.equal(result.getActionFromNamespace('foo', 'space.nested.so.nested')(), 6);
-    assert.equal(result.getActionFromNamespace('nested.foo', 'space.nested.so')(), 7);
+    assert.equal(result.getActionFromNamespace('foo')(), 1, 'foo');
+    assert.equal(result.getActionFromNamespace('foo', 'space')(), 2, 'space');
+    assert.equal(result.getActionFromNamespace('foo', 'space.nested')(), 3, 'space.nested');
+    assert.equal(result.getActionFromNamespace('foo', 'space.nested.so-nested')(), 4, 'space.nested.so-nested');
+    assert.equal(result.getActionFromNamespace('foo', 'space.nested.so/nested')(), 7, 'space.nested.so/nested');
+    assert.equal(result.getActionFromNamespace('foo', 'space.nested.so.nested')(), 7, 'space.nested.so.nested');
+    assert.equal(result.getActionFromNamespace('nested.foo', 'space.nested.so')(), 7, 'space.nested.so');
   });
 
   test('it return valid signal by namespace', function(assert) {
@@ -81,15 +80,18 @@ module('Unit | Utility | signals', function() {
     function getFn(name, index) {
       return {
         [name]() {
-          return `${name}${index}`;
+          return index;
         }
-      }
+      }[name];
     }
 
     let signals = {
       foo: getFn('foo', 1),
       space: {
-        foo: getFn('foo', 2)
+        foo: getFn('foo', 2),
+        space: {
+          foo: getFn('foo', 4)
+        },
       },
       'no-space': {
         foo: getFn('foo', 0)
@@ -100,7 +102,11 @@ module('Unit | Utility | signals', function() {
       signals
     }).create();
 
-    assert.equal(result.getActionFromNamespace('foo')(), 1);
+    assert.equal(result.getSignals()['foo'](), 1);
+    assert.equal(result.getSignals()['space/foo'](), 2);
+    assert.equal(result.getSignals()['space/space/foo'](), 4);
+    assert.equal(result.getSignals()['no-space/foo'](), 0);
+    assert.equal(Object.keys(result.getSignals()).length, 4);
   });
 
 });
