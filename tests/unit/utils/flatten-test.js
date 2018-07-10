@@ -1,4 +1,4 @@
-import flatten from 'dummy/utils/flatten';
+import flatten from 'ember-cerebraljs/utils/flatten';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | flatten', function() {

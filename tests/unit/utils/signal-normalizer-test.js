@@ -1,4 +1,4 @@
-import signalNormalizer from 'dummy/utils/signal-normalizer';
+import signalNormalizer from 'ember-cerebraljs/utils/signal-normalizer';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | signal-normalizer', function() {

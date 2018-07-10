@@ -1,4 +1,4 @@
-import ActionsObject from 'dummy/utils/actions';
+import ActionsObject from 'ember-cerebraljs/utils/actions';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | actions', function() {

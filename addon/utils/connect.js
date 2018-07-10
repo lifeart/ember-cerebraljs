@@ -2,6 +2,7 @@ import { isArray } from '@ember/array';
 import CerebralMixin from '../mixins/cerebral-mixin';
 import { View } from 'cerebral';
 import { state } from 'cerebral/tags';
+import logger from './logger';
 
 const BINDED_FLAG = '@';
 
@@ -26,7 +27,7 @@ export function createActionHandler (signal) {
         if (signal.startsWith(BINDED_FLAG)) {
             let resolvedSignal = this.get(signal.replace(BINDED_FLAG,''));
             if (!resolvedSignal) {
-                console.error(`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
+                logger('error',`Unable to find signal name binded as ${signal}, "${resolvedSignal}" given.`);
                 return;
             }
             this.sendSignal.apply(this, [resolvedSignal].concat(castToPrimitive(params)));

@@ -1,4 +1,4 @@
-import StateObject from 'dummy/utils/states';
+import StateObject from 'ember-cerebraljs/utils/states';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | states', function() {

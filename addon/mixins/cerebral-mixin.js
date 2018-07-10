@@ -8,9 +8,11 @@ import {
   inject
 } from '@ember/service';
 import normalizeSignalName from '../utils/signal-normalizer';
+import logger from '../utils/logger';
+
 export default Mixin.create({
   cerebraljs: inject(),
-  props: computed(function (params) {
+  props: computed(function () {
     return false;
   }),
   init() {
@@ -60,9 +62,9 @@ export default Mixin.create({
         }
         if (typeof result === 'undefined') {
           if (hasBindedProperty) {
-            console.error(`Unable to get state for property "${prop}" by binded as property "${bindedProperty}" path "${this.get(bindedProperty)}"`, this, cerebral);
+            logger('error',`Unable to get state for property "${prop}" by binded as property "${bindedProperty}" path "${this.get(bindedProperty)}"`, this, cerebral);
           } else {
-            console.error(`Unable to get state for property "${prop}" by path "${pathName}"`, this, cerebral);
+            logger('error',`Unable to get state for property "${prop}" by path "${pathName}"`, this, cerebral);
           }
         }
         return result;
@@ -145,7 +147,7 @@ export default Mixin.create({
   sendSignal(name, ...props) {
     const signal = get(this, 'cerebral').getSignal(normalizeSignalName(name));
     if (!signal) {
-      console.error(`Unable to find signal "${name}"`, props, this);
+      logger('error',`Unable to find signal "${name}"`, props, this);
       return;
     }
     signal.apply(signal, props);

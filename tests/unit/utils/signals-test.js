@@ -1,4 +1,4 @@
-import SignalsObject from 'dummy/utils/signals';
+import SignalsObject from 'ember-cerebraljs/utils/signals';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | signals', function() {

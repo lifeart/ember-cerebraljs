@@ -3,7 +3,7 @@ import { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import normalizeSignalName from './signal-normalizer';
 import flatten from './flatten';
-
+import logger from './logger';
 class SignalsObject extends EmberObject {
     getActions(...args) {
         const props = get(this, 'actions').getProperties(args);
@@ -42,7 +42,7 @@ class SignalsObject extends EmberObject {
         const actions = get(this, 'actions');
         const resolvedAction = this.getActionFromNamespace(action,namespace) || get(actions, action);
         if (!resolvedAction) {
-            console.error(`Unable to get action "${action}" from actions object`, actions);
+            logger('error',`Unable to get action "${action}" from actions object`, actions);
             return action;
         }
         return resolvedAction.bind(actions);
