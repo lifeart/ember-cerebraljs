@@ -3,12 +3,19 @@ module.exports = {
   description: 'Initializer to configure and inject Cerebral into your application.',
   afterInstall: function () {
     return this.addPackagesToProject([
-      {name: 'broccoli-replace', target: '*'}
+      // {
+      //   name:"function-tree", target: "^3.2.2"
+      // },
+      // {
+      //   name:"cerebral", target: "^3.2.2"
+      // },
+      // {
+      //   name:"@cerebral/baobab", target: "^3.2.2"
+      // },
     ]).then(()=>{
       return this.addAddonsToProject({
         packages: [
-          {name: 'ember-cerebral-shim', target: '*'},
-          {name: 'ember-cerebral-baobab-shim', target: '*'}
+          // { name: 'ember-auto-import', target: '*' }
         ]
       });
     })

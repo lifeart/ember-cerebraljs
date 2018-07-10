@@ -1,8 +1,8 @@
 import Service from '@ember/service';
-import { Controller } from 'cerebral'
-import Devtools from 'cerebral/devtools'
+import { getOwner } from '@ember/application';
+import { Controller, Module } from 'cerebral';
+import Devtools from 'cerebral/devtools';
 import BaobabModel from '@cerebral/baobab';
-import { inject } from '@ember/service';
 import rsvp from 'rsvp';
 
 const provide  = function(name, provider) {
@@ -18,8 +18,6 @@ export default Service.extend({
     devToolsEnabled: true, 
     devToolsHost: '127.0.0.1:8585',
     devToolsReconnect: true,
-    store: inject(),
-    ajax: inject(),
     modelConfig() {
         return {immutable: false};
     },
@@ -33,8 +31,8 @@ export default Service.extend({
                 Object.defineProperty(f, 'name', {value: `argsProvider`, writable: false});
                 return f;
             })(),
-            provide('store', this.get('store')),
-            provide('ajax', this.get('ajax')),
+            provide('store', getOwner(this).lookup('service:store')),
+            provide('ajax', getOwner(this).lookup('service:ajax')),
             provide('rsvp', rsvp)
         ];
     },
@@ -42,15 +40,17 @@ export default Service.extend({
         return new BaobabModel({}, this.modelConfig());
     },
     createController() {
-        const controller  = Controller({
+        const app = Module({
+            state: this.get('state').getState(),
+            signals: this.get('signals').getSignals(),
+            providers: this.getProviders()
+        });
+        const controller  = Controller(app, {
             Model: this.getNewModel(),
             devtools: this.get('devToolsEnabled') ? new Devtools({
                 host: this.get('devToolsHost'),
                 reconnect: this.get('devToolsReconnect')
             }): undefined,
-            state: this.get('state').getState(),
-            signals: this.get('signals').getSignals(),
-            providers: this.getProviders()
         });
         return controller;
     },

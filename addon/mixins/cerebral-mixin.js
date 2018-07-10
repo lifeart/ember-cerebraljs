@@ -2,7 +2,8 @@ import Mixin from '@ember/object/mixin';
 import {
   computed,
   get,
-  set
+  set,
+  defineProperty
 } from '@ember/object';
 import {
   inject
@@ -53,7 +54,7 @@ export default Mixin.create({
         hasBindedProperty = true;
       }
 
-      set(this, prop, computed(() => {
+      defineProperty(this, prop, computed(() => {
         let result;
         if (hasBindedProperty) {
           let statePath = this.get(bindedProperty);

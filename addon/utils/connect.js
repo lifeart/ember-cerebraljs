@@ -62,7 +62,6 @@ export function mapPropsToDepsAndKeys(props) {
             propKeys[localKey] = stateKey;
         }
     });
-
     return {
         dependencies,
         propKeys
@@ -77,8 +76,8 @@ export function createCerebralView(context) {
         controller: context.get('cerebraljs').get('cerebral'),
         displayName: context.toString() || String(context.get('elementId'))
     });
-    this._cerebralView = view;
-    this._cerebralView.mount();
+    context._cerebralView = view;
+    context._cerebralView.mount();
 }
 
 export function destroyCerebralView(context) {
@@ -113,7 +112,6 @@ export function connectEmberComponent(props=[], actions=[], rawComponent={}) {
     const normalizedActions = normalizeActions(actions);
 
     Object.assign(actionsObject, normalizedActions);
-
     return component.extend({
         props: normalizedProps,
         actions: actionsObject,

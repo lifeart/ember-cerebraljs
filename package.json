@@ -28,7 +28,11 @@
     "test:all": "ember try:each"
   },
   "dependencies": {
-    "ember-cli-babel": "^6.6.0"
+    "ember-auto-import": "^1.1.0",
+    "ember-cli-babel": "^6.6.0",
+    "@cerebral/baobab": "^3.2.2",
+    "function-tree": "^3.2.2",
+    "cerebral": "^4.2.2"
   },
   "devDependencies": {
     "broccoli-asset-rev": "^2.7.0",
