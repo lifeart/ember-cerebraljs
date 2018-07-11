@@ -1,18 +1,8 @@
 import Service from '@ember/service';
 import { getOwner } from '@ember/application';
-import { Controller, Module } from 'cerebral';
+import { Controller, Module, Provider } from 'cerebral';
 import Devtools from 'cerebral/devtools';
 import BaobabModel from '@cerebral/baobab';
-import rsvp from 'rsvp';
-
-const provide  = function(name, provider) {
-    const f = (context) => {
-        context[name] = provider;
-        return context;
-    }
-    Object.defineProperty(f, 'name', {value: `${name}Provider`, writable: false});
-    return f;
-}
 
 export default Service.extend({
     devToolsEnabled: true, 
@@ -22,28 +12,19 @@ export default Service.extend({
         return {immutable: false};
     },
     getProviders() {
-        return [
-            (function() {
-                const f = (context) => {
-                    context['args'] = context.props ? context.props.args : [];
-                    return context;
-                }
-                Object.defineProperty(f, 'name', {value: `argsProvider`, writable: false});
-                return f;
-            })(),
-            provide('store', getOwner(this).lookup('service:store')),
-            provide('ajax', getOwner(this).lookup('service:ajax')),
-            provide('rsvp', rsvp)
-        ];
+        return {
+            ajax: Provider(getOwner(this).lookup('service:ajax') || {}),
+            store: Provider(getOwner(this).lookup('service:ajax') || {})
+        };
     },
     getNewModel() {
         return new BaobabModel({}, this.modelConfig());
     },
     createController() {
         const app = Module({
+            providers: this.getProviders(),
             state: this.get('state').getState(),
-            signals: this.get('signals').getSignals(),
-            providers: this.getProviders()
+            signals: this.get('signals').getSignals()
         });
         const controller  = Controller(app, {
             Model: this.getNewModel(),
@@ -51,6 +32,8 @@ export default Service.extend({
                 host: this.get('devToolsHost'),
                 reconnect: this.get('devToolsReconnect')
             }): undefined,
+            throwToConsole: true,
+            stateChanges: {}
         });
         return controller;
     },
